@@ -112,6 +112,7 @@ $(function () {
 
 	// working with keyboard
 	//animate dan oldin stop() ni ishlatish kerak sababi animate ichida kop kodlar bolsa navbatga turib qoladi va biz hohlamaganda ham ishlab ketaverdi
+	//keypress bilan ishlama sababi official emas va documentationda ham xec narsa yoq, ishlatib qoyseng keyinchalik bug ham chiqishi mumkin
 	let box = $('.grey-box');
 	let arrow_right = 39;
 	let arrow_left = 37;
@@ -121,4 +122,159 @@ $(function () {
 		if (e === arrow_right) box.stop().animate({ marginLeft: '+=10px' }, 50);
 		if (e === arrow_left) box.stop().animate({ 'margin-left': '-=10px' }, 50);
 	});
+
+	//working with inputs focus and blur events
+	//focus bergan ishlasa blur bergan atmen qiladi yani blur inputdan click yoqolganda ochadigan buyruq
+	// let myInput = $('input:text, input[type="email"], input[type="password"], textarea');
+	// myInput.focus(function () {
+	// 	$(this).css('box-shadow', '0 0 4px #666');
+	// });
+	// myInput.focus(function () {
+	// 	$(this).css('box-shadow', '0 0 4px #666');
+	// });
+	// myInput.blur(function () {
+	// 	$(this).css('box-shadow', 'none');
+	// });
+	// myInput.blur(function () {
+	// 	let isError = $(this).val();
+	// 	let error = $('.error');
+	// 	if (isError.length < 3) {
+	// 		$(this).css('box-shadow', '0 0 4px #e61616');
+	// 		error.css('display', 'block');
+	// 	} else {
+	// 		$(this).css('box-shadow', '0 0 4px #05c341');
+	// 	}
+	// });
+	//change event
+	//uses for check boxex radio buttons and select ele
+	// $('#checkbox').change(function () {
+	// 	let isChecked = $(this).is(':checked'); // bu kodni alternative .prop("checked")
+	// 	if (isChecked) $(this).add("label[for='cb']").css('box-shadow', '0 0 4px #05c341');
+	// 	else {
+	// 		$(this).add("label[for='cb']").css('box-shadow', '0 0 4px #e61616');
+	// 	}
+	// });
+	//working with selection dropdowns:
+	$('#selection').change(function () {
+		let isSelected = $(this).find(':selected').text();
+		alert(isSelected);
+	});
+	// validation errors
+	let form = $('#form');
+	enableFastFeeback(form);
+
+	form.submit(function (event) {
+		let name = $('#name').val();
+		let password = $('#password').val();
+		let message = $('#message').val();
+		let checked = $('#checked').is(':checked');
+
+		// if (message.val().trim() == '') {
+		// 	message.css('box-shadow', '0 0 4px #e61616');
+		// 	event.preventDefault();
+		// }
+		validateNameField(name, event);
+		validatePasswordField(password, event);
+		validateMessageField(message, event);
+		validateCheckboxField(checked, event);
+	});
 });
+//error color blur
+function enableFastFeeback(formELement) {
+	let nameInput = formELement.find('#name');
+	let passwordInput = formELement.find('#password');
+	let messageInput = formELement.find('#message');
+	let checkboxInput = formELement.find('#checkbox'); //checkbox
+	//name
+	nameInput.blur(function (event) {
+		let name = $(this).val();
+		validateNameField(name, event);
+		if (!isValidName(name)) {
+			$(this).css({ 'box-shadow': '0 0 4px #e61616', border: '1px solid #600' });
+		} else {
+			$(this).css({ 'box-shadow': '0 0 4px #05c341', border: '1px solid #060' });
+		}
+	});
+	//password
+	passwordInput.blur(function (event) {
+		let password = $(this).val();
+		validatePasswordField(password, event);
+		if (!isValidPassword(password)) {
+			$(this).css({ 'box-shadow': '0 0 4px #e61616', border: '1px solid #600' });
+		} else {
+			$(this).css({ 'box-shadow': '0 0 4px #05c341', border: '1px solid #060' });
+		}
+	});
+	//textarea
+	messageInput.blur(function (event) {
+		let message = $(this).val();
+		validateMessageField(message, event);
+		if (!isValidMessage(message)) {
+			$(this).css({ 'box-shadow': '0 0 4px #e61616', border: '1px solid #600' });
+		} else {
+			$(this).css({ 'box-shadow': '0 0 4px #05c341', border: '1px solid #060' });
+		}
+	});
+	//checkbox
+	checkboxInput.change(function (event) {
+		let checked = $(this).is(':checked');
+		validateCheckboxField(checked, event);
+
+		if (!checked) {
+			$(this)
+				.add("label[for='cb']")
+				.css({ 'box-shadow': '0 0 4px #e61616', border: '1px solid #600' });
+		} else {
+			$(this)
+				.add("label[for='cb']")
+				.css({ 'box-shadow': '0 0 4px #05c341', border: '1px solid #060' });
+		}
+	});
+}
+//error validation for name
+function validateNameField(name, event) {
+	if (!isValidName(name)) {
+		$('#name-feedback').text('please enter at least 4 characters').css('color', 'red');
+		event.preventDefault();
+	} else {
+		$('#name-feedback').text('');
+	}
+}
+function isValidName(name) {
+	return name.length >= 4;
+}
+//error validation for password
+function validatePasswordField(password, event) {
+	if (!isValidPassword(password)) {
+		$('#password-feedback')
+			.text('please enter at least 4 characters and numbers')
+			.css('color', 'red');
+		event.preventDefault();
+	} else {
+		$('#password-feedback').text('');
+	}
+}
+function isValidPassword(password) {
+	return password.length >= 4 && /.*[0-9]/.test(password);
+}
+//error validation for textarea
+function validateMessageField(message, event) {
+	if (!isValidMessage(message)) {
+		$('#message-feedback').text('please enter a message').css('color', 'red');
+		event.preventDefault();
+	} else {
+		$('#message-feedback').text('');
+	}
+}
+function isValidMessage(message) {
+	return message.trim() != '';
+}
+//error validation for checked
+function validateCheckboxField(checked, event) {
+	if (!checked) {
+		$('#checkbox-feedback').text('please agree this').css('color', 'red');
+		event.preventDefault();
+	} else {
+		$('#checkbox-feedback').text('');
+	}
+}
